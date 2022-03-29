@@ -11,38 +11,45 @@ import os
 @csrf_exempt
 def user_csv(request):
     file = request.FILES["file"]
-
-    if (file.endswith('.csv')):
+    name=file.name
+    if (name.endswith('.csv')):
         items = file.readlines()
         columns = items[0].decode("utf-8").strip().split(',')
         data = {}
-
         for col in columns:
-            data[col] = []
-        
+            data[col] = []    
         for item in items[1:]:
             row_item = item.decode("utf-8").strip().split(',')
-            data['student_f_name'].append(row_item[0])
-            data['student_l_name'].append(row_item[1])
-            data['student_m_name'].append(row_item[2])
-            data['student_state'].append(row_item[3])
-            data['student_city'].append(row_item[4])
-            data['gender'].append(row_item[5])
+            try:
+                data['student_f_name'].append(row_item[0])
+                data['student_l_name'].append(row_item[1])
+                data['student_m_name'].append(row_item[2])
+                data['student_state'].append(row_item[3])
+                data['student_city'].append(row_item[4])
+                data['gender'].append(row_item[5])
 
-            print(data)
+                print(data)
 
-            state=State.objects.get_or_create(state=row_item[3])
-            city=City.objects.get_or_create(state=state,city=row_item[4])
+                state=State.objects.get_or_create(state=row_item[3])
+                city=City.objects.get_or_create(state=state,city=row_item[4])
 
-            Student.objects.get_or_create(student_f_name=row_item[0],
-                        student_l_name=row_item[1],
-                        student_m_name=row_item[2],
-                        student_state=state,
-                        student_city=city,
-                        gender=row_item[5],
-                        )
-
+                Student.objects.get_or_create(student_f_name=row_item[0],
+                            student_l_name=row_item[1],
+                            student_m_name=row_item[2],
+                            student_state=state,
+                            student_city=city,
+                            gender=row_item[5],
+                            )
+            except:
+                content={"student_f_name":"first name",
+                    "student_m_name":"middle name",
+                    "student_l_name":"last name",
+                    "student_state":"state",
+                    "student_city":"city",
+                    "gender":"(male/female/others)"}
+                return JsonResponse(data=("Enter valid data format",content),safe=False)
         return(JsonResponse(data=data,safe=False))
+        
     else:
         return HttpResponse("File should be in .csv format with valid data")
 
@@ -70,37 +77,47 @@ def home(request):
     if request.method=="POST":
 
         file = request.FILES["file"]
-        if (file.endswith('.csv')):
+        name=file.name
+        if (name.endswith('.csv')):
             items = file.readlines()
             columns = items[0].decode("utf-8").strip().split(',')
             data = {}
 
-            for col in columns:
-                data[col] = []
-            
-            for item in items[1:]:
-                row_item = item.decode("utf-8").strip().split(',')
-                data['student_f_name'].append(row_item[0])
-                data['student_l_name'].append(row_item[1])
-                data['student_m_name'].append(row_item[2])
-                data['student_state'].append(row_item[3])
-                data['student_city'].append(row_item[4])
-                data['gender'].append(row_item[5])
+            try:
+                for col in columns:
+                    data[col] = []
+                
+                for item in items[1:]:
+                    row_item = item.decode("utf-8").strip().split(',')
+                    data['student_f_name'].append(row_item[0])
+                    data['student_l_name'].append(row_item[1])
+                    data['student_m_name'].append(row_item[2])
+                    data['student_state'].append(row_item[3])
+                    data['student_city'].append(row_item[4])
+                    data['gender'].append(row_item[5])
 
-                print(data)
+                    print(data)
 
-                state=State.objects.get_or_create(state=row_item[3])
-                city=City.objects.get_or_create(state=state,city=row_item[4])
+                    state=State.objects.get_or_create(state=row_item[3])
+                    city=City.objects.get_or_create(state=state,city=row_item[4])
 
-                Student.objects.get_or_create(student_f_name=row_item[0],
-                            student_l_name=row_item[1],
-                            student_m_name=row_item[2],
-                            student_state=state,
-                            student_city=city,
-                            gender=row_item[5],
-                            )
+                    Student.objects.get_or_create(student_f_name=row_item[0],
+                                student_l_name=row_item[1],
+                                student_m_name=row_item[2],
+                                student_state=state,
+                                student_city=city,
+                                gender=row_item[5],
+                                )
 
-            return render(request,'home.html',{'students':data})
+                return render(request,'home.html',{'students':data})
+            except:
+                content={"student_f_name":"first name",
+                    "student_m_name":"middle name",
+                    "student_l_name":"last name",
+                    "student_state":"state",
+                    "student_city":"city",
+                    "gender":"(male/female/others)"}
+                return JsonResponse(data=("Enter valid data format",content),safe=False)
         else:
             return HttpResponse("File should be in .csv format with valid data")
 
